@@ -37,7 +37,7 @@ class ProgressButton extends Component {
     currentState: this.props.state || STATE.NOTHING,
   }
 
-  getDerivedStateFromProps(nextProps, state) {
+  static getDerivedStateFromProps(nextProps, state) {
     if (nextProps.state === state.prevState) { return }
     const { prevState } = state
     switch (nextProps.state) {
