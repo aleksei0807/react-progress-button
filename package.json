@@ -1,6 +1,6 @@
 {
-  "name": "react-progress-button",
-  "version": "5.0.1",
+  "name": "react-progress-button-for-images-uploader",
+  "version": "5.1.0",
   "description": "Simple react.js component for a inline progress indicator",
   "main": "lib/index.js",
   "jsnext:main": "src/index.js",
@@ -26,14 +26,13 @@
     "eslint-plugin-promise": "^2.0.0",
     "eslint-plugin-standard": "^2.0.0",
     "mocha": "^3.0.0",
-    "react": "^15.1.0",
-    "react-dom": "^15.1.0",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
     "sinon": "^1.17.3",
     "webpack": "^1.12.15"
   },
   "scripts": {
-    "prepublish": "make clean build",
-    "test": "make test"
+    "prepublish": "make clean build"
   },
   "repository": {
     "type": "git",

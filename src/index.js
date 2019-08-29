@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 
 export const STATE = {
   LOADING: 'loading',
@@ -8,39 +9,35 @@ export const STATE = {
   NOTHING: ''
 }
 
-const ProgressButton = React.createClass({
-  propTypes: {
-    classNamespace: React.PropTypes.string,
-    durationError: React.PropTypes.number,
-    durationSuccess: React.PropTypes.number,
-    form: React.PropTypes.string,
-    onClick: React.PropTypes.func,
-    onError: React.PropTypes.func,
-    onSuccess: React.PropTypes.func,
-    state: React.PropTypes.oneOf(Object.keys(STATE).map(k => STATE[k])),
-    type: React.PropTypes.string,
-    shouldAllowClickOnLoading: React.PropTypes.bool
-  },
+class ProgressButton extends Component {
+  static propTypes = {
+    classNamespace: PropTypes.string,
+    durationError: PropTypes.number,
+    durationSuccess: PropTypes.number,
+    form: PropTypes.string,
+    onClick: PropTypes.func,
+    onError: PropTypes.func,
+    onSuccess: PropTypes.func,
+    state: PropTypes.oneOf(Object.keys(STATE).map(k => STATE[k])),
+    type: PropTypes.string,
+    shouldAllowClickOnLoading: PropTypes.bool,
+  }
 
-  getDefaultProps () {
-    return {
-      classNamespace: 'pb-',
-      durationError: 1200,
-      durationSuccess: 500,
-      onClick () {},
-      onError () {},
-      onSuccess () {},
-      shouldAllowClickOnLoading: false
-    }
-  },
+  static defaultProps = {
+    classNamespace: 'pb-',
+    durationError: 1200,
+    durationSuccess: 500,
+    onClick () {},
+    onError () {},
+    onSuccess () {},
+    shouldAllowClickOnLoading: false,
+  }
 
-  getInitialState () {
-    return {
-      currentState: this.props.state || STATE.NOTHING
-    }
-  },
+  state = {
+    currentState: this.props.state || STATE.NOTHING,
+  }
 
-  componentWillReceiveProps (nextProps) {
+  componentWillReceiveProps(nextProps) {
     if (nextProps.state === this.props.state) { return }
     switch (nextProps.state) {
       case STATE.SUCCESS:
@@ -61,13 +58,67 @@ const ProgressButton = React.createClass({
       default:
         return
     }
-  },
+  }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     clearTimeout(this._timeout)
-  },
+  }
 
-  render () {
+  handleClick = (e) => {
+    if ((this.props.shouldAllowClickOnLoading ||
+      this.state.currentState !== 'loading') &&
+      this.state.currentState !== 'disabled'
+    ) {
+      this.props.onClick(e)
+    } else {
+      e.preventDefault()
+    }
+  }
+
+  loading = (promise) => {
+    this.setState({currentState: 'loading'})
+    if (promise && promise.then && promise.catch) {
+      promise
+        .then(() => {
+          this.success()
+        })
+        .catch(() => {
+          this.error()
+        })
+    }
+  }
+
+  notLoading = () => {
+    this.setState({currentState: STATE.NOTHING})
+  }
+
+  enable = () => {
+    this.setState({currentState: STATE.NOTHING})
+  }
+
+  disable = () => {
+    this.setState({currentState: STATE.DISABLED})
+  }
+
+  success = (callback, dontRemove) => {
+    this.setState({currentState: STATE.SUCCESS})
+    this._timeout = setTimeout(() => {
+      if (!dontRemove) { this.setState({currentState: STATE.NOTHING}) }
+      callback = callback || this.props.onSuccess
+      if (typeof callback === 'function') { callback() }
+    }, this.props.durationSuccess)
+  }
+
+  error = (callback) => {
+    this.setState({currentState: STATE.ERROR})
+    this._timeout = setTimeout(() => {
+      this.setState({currentState: STATE.NOTHING})
+      callback = callback || this.props.onError
+      if (typeof callback === 'function') { callback() }
+    }, this.props.durationError)
+  }
+
+  render() {
     const {
       className,
       classNamespace,
@@ -81,7 +132,7 @@ const ProgressButton = React.createClass({
       onSuccess, // eslint-disable-line no-unused-vars
       state, // eslint-disable-line no-unused-vars
       shouldAllowClickOnLoading, // eslint-disable-line no-unused-vars
-      ...containerProps
+      ...containerProps,
     } = this.props
 
     containerProps.className = classNamespace + 'container ' + this.state.currentState + ' ' + className
@@ -106,61 +157,7 @@ const ProgressButton = React.createClass({
         </button>
       </div>
     )
-  },
-
-  handleClick (e) {
-    if ((this.props.shouldAllowClickOnLoading ||
-      this.state.currentState !== 'loading') &&
-      this.state.currentState !== 'disabled'
-    ) {
-      this.props.onClick(e)
-    } else {
-      e.preventDefault()
-    }
-  },
-
-  loading (promise) {
-    this.setState({currentState: 'loading'})
-    if (promise && promise.then && promise.catch) {
-      promise
-        .then(() => {
-          this.success()
-        })
-        .catch(() => {
-          this.error()
-        })
-    }
-  },
-
-  notLoading () {
-    this.setState({currentState: STATE.NOTHING})
-  },
-
-  enable () {
-    this.setState({currentState: STATE.NOTHING})
-  },
-
-  disable () {
-    this.setState({currentState: STATE.DISABLED})
-  },
-
-  success (callback, dontRemove) {
-    this.setState({currentState: STATE.SUCCESS})
-    this._timeout = setTimeout(() => {
-      if (!dontRemove) { this.setState({currentState: STATE.NOTHING}) }
-      callback = callback || this.props.onSuccess
-      if (typeof callback === 'function') { callback() }
-    }, this.props.durationSuccess)
-  },
-
-  error (callback) {
-    this.setState({currentState: STATE.ERROR})
-    this._timeout = setTimeout(() => {
-      this.setState({currentState: STATE.NOTHING})
-      callback = callback || this.props.onError
-      if (typeof callback === 'function') { callback() }
-    }, this.props.durationError)
   }
-})
+}
 
 export default ProgressButton

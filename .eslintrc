@@ -9,6 +9,8 @@
     "expect": true
   },
   "rules": {
-    "no-unused-expressions": 0
+    "no-unused-expressions": 0,
+    "comma-dangle": 0,
+    "semi": 0,
   }
 }
