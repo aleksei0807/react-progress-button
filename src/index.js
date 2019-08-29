@@ -37,8 +37,9 @@ class ProgressButton extends Component {
     currentState: this.props.state || STATE.NOTHING,
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.state === this.props.state) { return }
+  getDerivedStateFromProps(nextProps, state) {
+    if (nextProps.state === state.prevState) { return }
+    const { prevState } = state
     switch (nextProps.state) {
       case STATE.SUCCESS:
         this.success()
@@ -89,30 +90,53 @@ class ProgressButton extends Component {
   }
 
   notLoading = () => {
-    this.setState({currentState: STATE.NOTHING})
+    this.setState({
+      currentState: STATE.NOTHING,
+      prevState: this.state.currentState,
+    })
   }
 
   enable = () => {
-    this.setState({currentState: STATE.NOTHING})
+    this.setState({
+      currentState: STATE.NOTHING,
+      prevState: this.state.currentState,
+    })
   }
 
   disable = () => {
-    this.setState({currentState: STATE.DISABLED})
+    this.setState({
+      currentState: STATE.DISABLED,
+      prevState: this.state.currentState,
+    })
   }
 
   success = (callback, dontRemove) => {
-    this.setState({currentState: STATE.SUCCESS})
+    this.setState({
+      currentState: STATE.SUCCESS,
+      prevState: this.state.currentState,
+    })
     this._timeout = setTimeout(() => {
-      if (!dontRemove) { this.setState({currentState: STATE.NOTHING}) }
+      if (!dontRemove) {
+        this.setState({
+          currentState: STATE.NOTHING,
+          prevState: this.state.currentState,
+        })
+      }
       callback = callback || this.props.onSuccess
       if (typeof callback === 'function') { callback() }
     }, this.props.durationSuccess)
   }
 
   error = (callback) => {
-    this.setState({currentState: STATE.ERROR})
+    this.setState({
+      currentState: STATE.ERROR,
+      prevState: this.state.currentState,
+    })
     this._timeout = setTimeout(() => {
-      this.setState({currentState: STATE.NOTHING})
+      this.setState({
+        currentState: STATE.NOTHING,
+        prevState: this.state.currentState,
+      })
       callback = callback || this.props.onError
       if (typeof callback === 'function') { callback() }
     }, this.props.durationError)
